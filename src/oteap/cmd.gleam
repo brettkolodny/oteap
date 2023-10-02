@@ -15,6 +15,10 @@ pub fn task(f: fn() -> msg) {
   Task(f)
 }
 
+pub fn batch(fs: List(Cmd(msg))) {
+  Batch(fs)
+}
+
 pub fn execute_(subject: Pid, cmd: Cmd(msg)) {
   case cmd {
     None -> Nil

@@ -1,5 +1,5 @@
 import gleam/io
-import gleam/erlang/process.{Pid, Subject}
+import gleam/erlang/process
 import oteap/tea_server.{TeaServer}
 import oteap/cmd.{Cmd}
 
@@ -7,10 +7,9 @@ import oteap/cmd.{Cmd}
 
 pub fn main() {
   let server = TeaServer(fn() { init(Nil) }, update)
-  let assert Ok(_actor) = tea_server.start(server)
+  let server_ = tea_server.start(server)
+  io.debug(server_)
   process.sleep_forever()
-
-  io.println("Hello from oteap!")
 }
 
 // MSG -------------------------------------------------------------------------
@@ -28,7 +27,6 @@ type Model =
 // INIT ------------------------------------------------------------------------
 
 fn init(_: Nil) -> #(Model, Cmd(Msg)) {
-  io.debug("Starting!")
   let command =
     fn() {
       process.sleep(1000)
@@ -42,20 +40,16 @@ fn init(_: Nil) -> #(Model, Cmd(Msg)) {
 // UPDATE ----------------------------------------------------------------------
 
 fn update(model: Model, msg: Msg) -> #(Model, Cmd(Msg)) {
-  io.debug(msg)
   case msg {
     Increment -> {
-      let command =
-        fn() {
-          process.sleep(1000)
-          Increment
-        }
-        |> cmd.task()
+      let inc_cmd = fn() {
+        process.sleep(1000)
+        Increment
+      }
 
-      #(model + 1, command)
+      #(model + 1, cmd.task(inc_cmd))
     }
 
     Decrement -> #(model - 1, cmd.none)
   }
 }
-
